@@ -7,9 +7,8 @@ export async function GET() {
     const { rows } = await client.query(`
       SELECT
         r.id, r.topic, r.url, r.title, r.content, r.labeled, r.created_at,
-        l.labels
+        (SELECT l.labels FROM labels l WHERE l.result_id = r.id ORDER BY l.created_at DESC LIMIT 1) AS labels
       FROM results r
-      LEFT JOIN labels l ON l.result_id = r.id
       ORDER BY r.created_at DESC
       LIMIT 50
     `);
