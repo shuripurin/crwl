@@ -14,6 +14,9 @@ export async function GET() {
       LIMIT 50
     `);
     return NextResponse.json(rows);
+  } catch (err) {
+    console.error("route error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   } finally {
     client.release();
   }

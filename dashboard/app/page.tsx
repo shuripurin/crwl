@@ -80,7 +80,7 @@ export default function Page() {
         ]);
         setStats(s);
         setResults(r);
-      } catch { /* retry */ }
+      } catch (err) { console.error("poll error:", err); }
     }
     poll();
     const id = setInterval(poll, 2000);
@@ -248,8 +248,8 @@ export default function Page() {
                 </div>
                 <div className="log-list">
                   {stats && stats.recent_logs.length > 0 ? (
-                    stats.recent_logs.slice(0, 5).map((l, i) => (
-                      <div className="log-row" key={i}>
+                    stats.recent_logs.slice(0, 5).map((l) => (
+                      <div className="log-row" key={`${l.created_at}-${l.agent_id}`}>
                         <span className="log-time">{fmtTime(l.created_at)}</span>
                         <span className="log-agent">{l.agent_id}</span>
                         <span className={`log-status ${sc(l.status)}`}>{l.status}</span>
@@ -295,8 +295,8 @@ export default function Page() {
               <div className="card">
                 <div className={`log-list log-scroll-full`}>
                   {stats && stats.recent_logs.length > 0 ? (
-                    stats.recent_logs.map((l, i) => (
-                      <div className="log-row" key={i}>
+                    stats.recent_logs.map((l) => (
+                      <div className="log-row" key={`${l.created_at}-${l.agent_id}`}>
                         <span className="log-time">{fmtTime(l.created_at)}</span>
                         <span className="log-agent">{l.agent_id}</span>
                         <span className={`log-status ${sc(l.status)}`}>{l.status}</span>
