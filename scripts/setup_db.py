@@ -3,8 +3,10 @@ Create the results, labels, and agent_logs tables in the Ghost Postgres database
 
 Usage:
     python scripts/setup_db.py
+    python scripts/setup_db.py --reset   # wipe all data
 """
 
+import argparse
 import os
 
 import psycopg2
@@ -14,8 +16,20 @@ load_dotenv()
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--reset", action="store_true", help="Wipe all data from tables")
+    args = parser.parse_args()
+
     conn = psycopg2.connect(os.environ["DATABASE_URL"])
     cur = conn.cursor()
+
+    if args.reset:
+        cur.execute("TRUNCATE labels, agent_logs, results RESTART IDENTITY CASCADE")
+        conn.commit()
+        cur.close()
+        conn.close()
+        print("All data wiped.")
+        return
 
     cur.execute("""
         CREATE TABLE IF NOT EXISTS results (
