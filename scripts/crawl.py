@@ -148,12 +148,15 @@ async def run_agent(
             if response.stop_reason == "end_turn":
                 break
 
-            # Filter out code_execution blocks that lack results, which cause
-            # 400 errors when echoed back in the conversation history.
+            # Only keep text and web_search_tool_result blocks. Server-side
+            # tool use blocks (type "server_tool_use") for code_execution and
+            # their results cause 400 errors when echoed back without matching
+            # result pairs.
+            SAFE_TYPES = {"text", "web_search_tool_result"}
             filtered = [
                 b
                 for b in response.content
-                if getattr(b, "type", None) != "code_execution"
+                if getattr(b, "type", None) in SAFE_TYPES
             ]
             if not filtered:
                 break
