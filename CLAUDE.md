@@ -32,6 +32,7 @@ cd dashboard && npm install
 ```
 
 Required env vars:
+
 - `ANTHROPIC_API_KEY` — Claude API key
 - `DATABASE_URL` — Postgres connection string from `ghost connect <db-id>`
 
@@ -54,12 +55,14 @@ ghost psql <db-id>
 ## Code Conventions
 
 ### Shared Patterns
+
 - `DATABASE_URL` env var is the single source of truth for DB connection (from Ghost)
 - All timestamps are `timestamptz` with `default now()`
 - Agent IDs are generated as `{type}-{uuid[:8]}` (e.g. `crawler-a1b2c3d4`)
 - No ORMs — raw SQL only in both Python and TypeScript
 
 ### Ghost Database
+
 - Ghost is Postgres under the hood — all standard SQL and `psycopg2`/`pg` patterns work unchanged
 - Use `ghost psql <db-id>` for interactive SQL sessions
 - Use `ghost fork <db-id>` to create a copy for safe experimentation
@@ -68,6 +71,7 @@ ghost psql <db-id>
 ## DB Schema
 
 Three tables:
+
 - **`results`** — crawled web results (topic, url, title, content, agent_id, labeled flag)
 - **`labels`** — classification labels per result (result_id FK, labels JSONB)
 - **`agent_logs`** — agent activity log (agent_id, agent_type, status, message)
