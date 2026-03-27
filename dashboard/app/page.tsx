@@ -92,7 +92,7 @@ export default function Page() {
       }
     }
     poll();
-    const id = setInterval(poll, 2000);
+    const id = setInterval(poll, 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -140,7 +140,7 @@ export default function Page() {
         ))}
         <div className="sidebar-footer">
           <span className="live-dot" />
-          Live · 2s poll
+          Live · 1s poll
         </div>
       </nav>
 
@@ -202,7 +202,7 @@ export default function Page() {
                 <div className="card-header">
                   <div>
                     <div className="card-title">Overview</div>
-                    <div className="card-subtitle">live · updates every 2s</div>
+                    <div className="card-subtitle">live · updates every 1s</div>
                   </div>
                 </div>
                 <div className="inline-stats">
