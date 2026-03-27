@@ -98,7 +98,7 @@ async def run_agent(agent_id: str, schema_str: str, batch_size: int, db_url: str
     client = anthropic.AsyncAnthropic()
     schema = parse_schema(schema_str)
 
-    db_log(conn, agent_id, "started", f"Labeling with schema: {schema_str}")
+    db_log(conn, agent_id, "running", f"Labeling with schema: {schema_str}")
 
     labeled_count = 0
 

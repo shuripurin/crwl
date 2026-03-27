@@ -53,7 +53,9 @@ def db_log(conn, agent_id: str, status: str, message: str):
     conn.commit()
 
 
-def db_insert_result(conn, agent_id: str, topic: str, url: str, title: str, content: str):
+def db_insert_result(
+    conn, agent_id: str, topic: str, url: str, title: str, content: str
+):
     with conn.cursor() as cur:
         cur.execute(
             "INSERT INTO results (topic, url, title, content, agent_id) VALUES (%s, %s, %s, %s, %s)",
@@ -62,21 +64,23 @@ def db_insert_result(conn, agent_id: str, topic: str, url: str, title: str, cont
     conn.commit()
 
 
-def extract_json_blocks(text: str, conn=None, agent_id: str = "") -> list[dict]:
+def extract_json_blocks(text: str) -> tuple[list[dict], list[str]]:
     blocks = []
+    warnings = []
     for match in re.finditer(r"\{[^{}]*\}", text, re.DOTALL):
         try:
             obj = json.loads(match.group())
             if all(k in obj for k in ("url", "title", "content")):
                 blocks.append(obj)
         except json.JSONDecodeError:
-            if conn and agent_id:
-                db_log(conn, agent_id, "warning", f"Failed to parse JSON block: {match.group()[:80]}")
-    return blocks
+            warnings.append(f"Failed to parse JSON block: {match.group()[:80]}")
+    return blocks, warnings
 
 
-async def run_agent(agent_id: str, topic: str, angle: str, max_results: int, db_url: str):
-    conn = psycopg2.connect(db_url)
+async def run_agent(
+    agent_id: str, topic: str, angle: str, max_results: int, db_url: str
+):
+    conn = await asyncio.to_thread(psycopg2.connect, db_url)
     client = anthropic.AsyncAnthropic()
 
     system = (
@@ -87,10 +91,17 @@ async def run_agent(agent_id: str, topic: str, angle: str, max_results: int, db_
         "Aim to find as many distinct, high-quality results as possible."
     )
 
-    messages = [{"role": "user", "content": f"Research '{topic}' focusing on {angle}. Output JSON blocks for each result."}]
+    messages = [
+        {
+            "role": "user",
+            "content": f"Research '{topic}' focusing on {angle}. Output JSON blocks for each result.",
+        }
+    ]
     tools = [{"type": "web_search_20260209", "name": "web_search", "max_uses": 10}]
 
-    db_log(conn, agent_id, "started", f"Researching '{topic}' from angle: {angle}")
+    await asyncio.to_thread(
+        db_log, conn, agent_id, "running", f"Researching '{topic}' from angle: {angle}"
+    )
 
     results_found = 0
     turn = 0
@@ -103,7 +114,7 @@ async def run_agent(agent_id: str, topic: str, angle: str, max_results: int, db_
             while attempt < 3:
                 try:
                     response = await client.messages.create(
-                        model="claude-opus-4-5",
+                        model="claude-sonnet-4-6",
                         max_tokens=4096,
                         system=system,
                         tools=tools,
@@ -111,18 +122,32 @@ async def run_agent(agent_id: str, topic: str, angle: str, max_results: int, db_
                     )
                     break
                 except anthropic.RateLimitError:
-                    wait = 2 ** attempt
-                    db_log(conn, agent_id, "warning", f"Rate limited, retrying in {wait}s")
+                    wait = 2**attempt
+                    await asyncio.to_thread(
+                        db_log,
+                        conn,
+                        agent_id,
+                        "warning",
+                        f"Rate limited, retrying in {wait}s",
+                    )
                     await asyncio.sleep(wait)
                     attempt += 1
 
             if response is None:
-                db_log(conn, agent_id, "error", "Max retries exceeded on rate limit")
+                await asyncio.to_thread(
+                    db_log,
+                    conn,
+                    agent_id,
+                    "error",
+                    "Max retries exceeded on rate limit",
+                )
                 break
 
             for block in response.content:
                 if block.type == "text":
-                    extracted = extract_json_blocks(block.text, conn, agent_id)
+                    extracted, parse_warnings = extract_json_blocks(block.text)
+                    for warn in parse_warnings:
+                        await asyncio.to_thread(db_log, conn, agent_id, "warning", warn)
                     for item in extracted:
                         if results_found >= max_results:
                             break
@@ -138,22 +163,27 @@ async def run_agent(agent_id: str, topic: str, angle: str, max_results: int, db_
                             )
                             results_found += 1
                         except Exception as e:
-                            db_log(conn, agent_id, "warning", f"Failed to insert result: {e}")
+                            await asyncio.to_thread(
+                                db_log,
+                                conn,
+                                agent_id,
+                                "warning",
+                                f"Failed to insert result: {e}",
+                            )
 
             if response.stop_reason == "end_turn":
                 break
-            elif response.stop_reason == "pause_turn":
-                messages.append({"role": "assistant", "content": response.content})
-                turn += 1
-                continue
-            else:
-                messages.append({"role": "assistant", "content": response.content})
-                turn += 1
 
-        db_log(conn, agent_id, "completed", f"Found {results_found} results")
+            messages.append({"role": "assistant", "content": response.content})
+            messages.append({"role": "user", "content": "Continue searching."})
+            turn += 1
+
+        await asyncio.to_thread(
+            db_log, conn, agent_id, "completed", f"Found {results_found} results"
+        )
 
     except Exception as e:
-        db_log(conn, agent_id, "error", str(e))
+        await asyncio.to_thread(db_log, conn, agent_id, "error", str(e))
     finally:
         conn.close()
 
@@ -166,7 +196,15 @@ async def main():
     for i in range(args.agents):
         agent_id = f"crawler-{uuid.uuid4().hex[:8]}"
         angle = ANGLES[i % len(ANGLES)]
-        agents.append(run_agent(agent_id, args.topic, angle, args.max_results // args.agents or 1, db_url))
+        agents.append(
+            run_agent(
+                agent_id,
+                args.topic,
+                angle,
+                args.max_results // args.agents or 1,
+                db_url,
+            )
+        )
 
     await asyncio.gather(*agents)
     print("All crawl agents finished.")
