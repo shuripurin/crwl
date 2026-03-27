@@ -1,2 +1,6 @@
 .env
 .DS_Store
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
