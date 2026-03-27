@@ -6,12 +6,13 @@ Autonomous web research tool using parallel Claude agents with Ghost-hosted Post
 
 `web-research-labeler` crawls the web for a given topic, stores results in a Postgres database, labels results with configurable schemas, and displays live progress in a dashboard.
 
-Key features:
-- Parallel Claude agents for research and labeling
-- Ghost-managed Postgres database via `DATABASE_URL`
-- Python CLI scripts for crawl and labeling
-- Next.js dashboard for live monitoring
-- Raw SQL + lightweight `pg` and `psycopg2` usage
+Languages: Python, TypeScript, CSS
+Frameworks & Libraries: Next.js (dashboard UI), React (via Next.js)
+Database: PostgreSQL — accessed via raw SQL using pg (Node.js) and psycopg2 (Python)
+Cloud/Platform: Ghost CLI — used to provision and manage the Postgres database via DATABASE_URL
+AI: Anthropic Claude API — parallel Claude agents using the web_search tool for crawling and labeling
+APIs & Tools: Anthropic web search tool (web_search_20260209), REST API routes via Next.js
+Other: Python venv, Shell scripting (start_dashboard.sh), .env config management 
 
 ## Repository Structure
 
