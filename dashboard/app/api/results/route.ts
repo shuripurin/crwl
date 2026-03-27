@@ -15,7 +15,10 @@ export async function GET() {
     return NextResponse.json(rows);
   } catch (err) {
     console.error("route error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   } finally {
     client.release();
   }

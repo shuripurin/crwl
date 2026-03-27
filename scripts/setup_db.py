@@ -17,7 +17,9 @@ load_dotenv()
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--reset", action="store_true", help="Wipe all data from tables")
+    parser.add_argument(
+        "--reset", action="store_true", help="Wipe all data from tables"
+    )
     args = parser.parse_args()
 
     conn = psycopg2.connect(os.environ["DATABASE_URL"])

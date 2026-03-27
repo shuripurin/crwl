@@ -116,7 +116,7 @@ async def run_agent(agent_id: str, schema_str: str, batch_size: int, db_url: str
             prompt = (
                 f"Classify each result using this schema: {schema_str}\n\n"
                 f"For each result, return a JSON object on its own line with 'id' and one key per schema field.\n"
-                f"Example: {{\"id\": 1, \"relevance\": \"high\", \"type\": \"article\"}}\n\n"
+                f'Example: {{"id": 1, "relevance": "high", "type": "article"}}\n\n'
                 f"Results to classify:\n{items_text}"
             )
 
@@ -131,8 +131,10 @@ async def run_agent(agent_id: str, schema_str: str, batch_size: int, db_url: str
                     )
                     break
                 except anthropic.RateLimitError:
-                    wait = 2 ** attempt
-                    db_log(conn, agent_id, "warning", f"Rate limited, retrying in {wait}s")
+                    wait = 2**attempt
+                    db_log(
+                        conn, agent_id, "warning", f"Rate limited, retrying in {wait}s"
+                    )
                     await asyncio.sleep(wait)
                     attempt += 1
 
@@ -149,9 +151,16 @@ async def run_agent(agent_id: str, schema_str: str, batch_size: int, db_url: str
                     if result_id is None:
                         continue
                     if not validate_labels(obj, schema):
-                        db_log(conn, agent_id, "warning", f"Labels don't match schema for id {result_id}, skipping")
+                        db_log(
+                            conn,
+                            agent_id,
+                            "warning",
+                            f"Labels don't match schema for id {result_id}, skipping",
+                        )
                         continue
-                    await asyncio.to_thread(db_save_labels, conn, result_id, obj, agent_id)
+                    await asyncio.to_thread(
+                        db_save_labels, conn, result_id, obj, agent_id
+                    )
                     labeled_count += 1
                 except (json.JSONDecodeError, Exception) as e:
                     db_log(conn, agent_id, "warning", f"Failed to save label: {e}")

@@ -22,8 +22,15 @@ load_dotenv()
 def main():
     parser = argparse.ArgumentParser(description="Export results and labels to JSON")
     parser.add_argument("--topic", help="Filter by topic")
-    parser.add_argument("--labeled-only", action="store_true", help="Only export labeled results")
-    parser.add_argument("--output", "-o", default="export.json", help="Output file path (default: export.json)")
+    parser.add_argument(
+        "--labeled-only", action="store_true", help="Only export labeled results"
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        default="export.json",
+        help="Output file path (default: export.json)",
+    )
     args = parser.parse_args()
 
     conn = psycopg2.connect(os.environ["DATABASE_URL"])

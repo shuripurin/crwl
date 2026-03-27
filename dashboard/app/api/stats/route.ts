@@ -12,13 +12,24 @@ export async function GET() {
           COUNT(*) FILTER (WHERE labeled = false)::text AS unlabeled
         FROM results
       `),
-      client.query<{ agent_id: string; agent_type: string; status: string; updated_at: string }>(`
+      client.query<{
+        agent_id: string;
+        agent_type: string;
+        status: string;
+        updated_at: string;
+      }>(`
         SELECT DISTINCT ON (agent_id)
           agent_id, agent_type, status, created_at AS updated_at
         FROM agent_logs
         ORDER BY agent_id, created_at DESC
       `),
-      client.query<{ agent_id: string; agent_type: string; status: string; message: string; created_at: string }>(`
+      client.query<{
+        agent_id: string;
+        agent_type: string;
+        status: string;
+        message: string;
+        created_at: string;
+      }>(`
         SELECT agent_id, agent_type, status, message, created_at
         FROM agent_logs
         ORDER BY created_at DESC
@@ -26,7 +37,11 @@ export async function GET() {
       `),
     ]);
 
-    const { total, labeled, unlabeled } = counts.rows[0] ?? { total: "0", labeled: "0", unlabeled: "0" };
+    const { total, labeled, unlabeled } = counts.rows[0] ?? {
+      total: "0",
+      labeled: "0",
+      unlabeled: "0",
+    };
 
     return NextResponse.json({
       total: Number(total),
@@ -37,7 +52,10 @@ export async function GET() {
     });
   } catch (err) {
     console.error("route error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   } finally {
     client.release();
   }

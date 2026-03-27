@@ -7,6 +7,7 @@ Autonomous web research tool using parallel Claude agents with Ghost-hosted Post
 `web-research-labeler` crawls the web for a given topic, stores results in a Postgres database, labels results with configurable schemas, and displays live progress in a dashboard.
 
 Key features:
+
 - Parallel Claude agents for research and labeling
 - Ghost-managed Postgres database via `DATABASE_URL`
 - Python CLI scripts for crawl and labeling

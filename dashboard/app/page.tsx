@@ -46,7 +46,11 @@ function sc(status: string) {
 }
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return new Date(iso).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 function badgeClass(val: string) {
@@ -67,7 +71,10 @@ export default function Page() {
   useEffect(() => {
     setMounted(true);
     setNow(new Date().toLocaleTimeString());
-    const tick = setInterval(() => setNow(new Date().toLocaleTimeString()), 1000);
+    const tick = setInterval(
+      () => setNow(new Date().toLocaleTimeString()),
+      1000,
+    );
     return () => clearInterval(tick);
   }, []);
 
@@ -80,22 +87,27 @@ export default function Page() {
         ]);
         setStats(s);
         setResults(r);
-      } catch (err) { console.error("poll error:", err); }
+      } catch (err) {
+        console.error("poll error:", err);
+      }
     }
     poll();
     const id = setInterval(poll, 2000);
     return () => clearInterval(id);
   }, []);
 
-  const pct = stats && stats.total > 0 ? Math.round((stats.labeled / stats.total) * 100) : 0;
+  const pct =
+    stats && stats.total > 0
+      ? Math.round((stats.labeled / stats.total) * 100)
+      : 0;
 
   if (!mounted) return <div className="shell" />;
 
   const navItems: { key: View; label: string }[] = [
     { key: "dashboard", label: "Dashboard" },
-    { key: "agents",    label: "Agents" },
-    { key: "log",       label: "Activity Log" },
-    { key: "results",   label: "Results" },
+    { key: "agents", label: "Agents" },
+    { key: "log", label: "Activity Log" },
+    { key: "results", label: "Results" },
   ];
 
   return (
@@ -103,7 +115,13 @@ export default function Page() {
       {/* Sidebar */}
       <nav className="sidebar">
         <div className="sidebar-logo">
-          <Image src="/logo.png" alt="crwl" width={32} height={32} className="sidebar-logo-img" />
+          <Image
+            src="/logo.png"
+            alt="crwl"
+            width={32}
+            height={32}
+            className="sidebar-logo-img"
+          />
           <div>
             <h1>crwl</h1>
             <p>Research Labeler</p>
@@ -128,7 +146,6 @@ export default function Page() {
 
       {/* Main area */}
       <main className="main">
-
         {/* WaterPod-style top stat bar */}
         <div className="stat-topbar">
           <div className="stat-topbar-item">
@@ -158,8 +175,11 @@ export default function Page() {
           <div className="stat-topbar-item">
             <div className="stat-topbar-label">Agents Online</div>
             <div className="stat-topbar-val">
-              {stats?.agents.filter(a => a.status === "running").length ?? "—"}
-              <span className="stat-topbar-unit">/ {stats?.agents.length ?? "—"}</span>
+              {stats?.agents.filter((a) => a.status === "running").length ??
+                "—"}
+              <span className="stat-topbar-unit">
+                / {stats?.agents.length ?? "—"}
+              </span>
             </div>
           </div>
           <div className="stat-topbar-right">
@@ -167,16 +187,16 @@ export default function Page() {
               <span className="live-dot" />
               {pct}% complete
             </div>
-            <span className="topbar-time" suppressHydrationWarning>{now}</span>
+            <span className="topbar-time" suppressHydrationWarning>
+              {now}
+            </span>
           </div>
         </div>
 
         <div className="page-content">
-
           {/* ── Dashboard ── */}
           {view === "dashboard" && (
             <div className="bento">
-
               {/* Progress + overview — pastel card */}
               <div className="card card-pastel bento-2">
                 <div className="card-header">
@@ -193,12 +213,16 @@ export default function Page() {
                   </div>
                   <div className="inline-stat">
                     <div className="inline-stat-label">Labeled</div>
-                    <div className="inline-stat-val">{stats?.labeled ?? "—"}</div>
+                    <div className="inline-stat-val">
+                      {stats?.labeled ?? "—"}
+                    </div>
                     <div className="inline-stat-sub">{pct}% of total</div>
                   </div>
                   <div className="inline-stat">
                     <div className="inline-stat-label">Remaining</div>
-                    <div className="inline-stat-val">{stats?.unlabeled ?? "—"}</div>
+                    <div className="inline-stat-val">
+                      {stats?.unlabeled ?? "—"}
+                    </div>
                     <div className="inline-stat-sub">to classify</div>
                   </div>
                 </div>
@@ -208,7 +232,10 @@ export default function Page() {
                     <span>{pct}%</span>
                   </div>
                   <div className="progress-track">
-                    <div className="progress-fill" style={{ width: `${pct}%` }} />
+                    <div
+                      className="progress-fill"
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
                 </div>
               </div>
@@ -218,7 +245,9 @@ export default function Page() {
                 <div className="card-header">
                   <div>
                     <div className="card-title">Agents</div>
-                    <div className="card-subtitle">{stats?.agents.length ?? 0} recorded</div>
+                    <div className="card-subtitle">
+                      {stats?.agents.length ?? 0} recorded
+                    </div>
                   </div>
                 </div>
                 <div className="agents-list">
@@ -229,7 +258,9 @@ export default function Page() {
                           <div className="agent-id">{a.agent_id}</div>
                           <div className="agent-type">{a.agent_type}</div>
                         </div>
-                        <span className={`status-tag ${sc(a.status)}`}>{a.status}</span>
+                        <span className={`status-tag ${sc(a.status)}`}>
+                          {a.status}
+                        </span>
                       </div>
                     ))
                   ) : (
@@ -249,10 +280,17 @@ export default function Page() {
                 <div className="log-list">
                   {stats && stats.recent_logs.length > 0 ? (
                     stats.recent_logs.slice(0, 5).map((l) => (
-                      <div className="log-row" key={`${l.created_at}-${l.agent_id}`}>
-                        <span className="log-time">{fmtTime(l.created_at)}</span>
+                      <div
+                        className="log-row"
+                        key={`${l.created_at}-${l.agent_id}`}
+                      >
+                        <span className="log-time">
+                          {fmtTime(l.created_at)}
+                        </span>
                         <span className="log-agent">{l.agent_id}</span>
-                        <span className={`log-status ${sc(l.status)}`}>{l.status}</span>
+                        <span className={`log-status ${sc(l.status)}`}>
+                          {l.status}
+                        </span>
                         <span className="log-msg">{l.message}</span>
                       </div>
                     ))
@@ -261,14 +299,15 @@ export default function Page() {
                   )}
                 </div>
               </div>
-
             </div>
           )}
 
           {/* ── Agents ── */}
           {view === "agents" && (
             <>
-              <p className="section-title">All Agents ({stats?.agents.length ?? 0})</p>
+              <p className="section-title">
+                All Agents ({stats?.agents.length ?? 0})
+              </p>
               <div className="agents-list">
                 {stats && stats.agents.length > 0 ? (
                   stats.agents.map((a) => (
@@ -278,7 +317,9 @@ export default function Page() {
                         <div className="agent-type">{a.agent_type}</div>
                       </div>
                       <span className="agent-ts">{fmtTime(a.updated_at)}</span>
-                      <span className={`status-tag ${sc(a.status)}`}>{a.status}</span>
+                      <span className={`status-tag ${sc(a.status)}`}>
+                        {a.status}
+                      </span>
                     </div>
                   ))
                 ) : (
@@ -291,15 +332,24 @@ export default function Page() {
           {/* ── Activity Log ── */}
           {view === "log" && (
             <>
-              <p className="section-title">Activity Log ({stats?.recent_logs.length ?? 0} events)</p>
+              <p className="section-title">
+                Activity Log ({stats?.recent_logs.length ?? 0} events)
+              </p>
               <div className="card">
                 <div className={`log-list log-scroll-full`}>
                   {stats && stats.recent_logs.length > 0 ? (
                     stats.recent_logs.map((l) => (
-                      <div className="log-row" key={`${l.created_at}-${l.agent_id}`}>
-                        <span className="log-time">{fmtTime(l.created_at)}</span>
+                      <div
+                        className="log-row"
+                        key={`${l.created_at}-${l.agent_id}`}
+                      >
+                        <span className="log-time">
+                          {fmtTime(l.created_at)}
+                        </span>
                         <span className="log-agent">{l.agent_id}</span>
-                        <span className={`log-status ${sc(l.status)}`}>{l.status}</span>
+                        <span className={`log-status ${sc(l.status)}`}>
+                          {l.status}
+                        </span>
                         <span className="log-msg">{l.message}</span>
                       </div>
                     ))
@@ -331,18 +381,35 @@ export default function Page() {
                       <tbody>
                         {results.map((r) => (
                           <tr key={r.id}>
-                            <td className="td-title">{r.title || "Untitled"}</td>
+                            <td className="td-title">
+                              {r.title || "Untitled"}
+                            </td>
                             <td className="td-url">
-                              <a href={r.url} target="_blank" rel="noopener noreferrer">{r.url}</a>
+                              <a
+                                href={r.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {r.url}
+                              </a>
                             </td>
                             <td>{r.topic}</td>
                             <td>
                               <div className="badge-group">
-                                {r.labels
-                                  ? Object.entries(r.labels).map(([k, v]) => (
-                                      <span className={`badge ${badgeClass(v)}`} key={k}>{k}: {v}</span>
-                                    ))
-                                  : <span className="badge badge-muted">unlabeled</span>}
+                                {r.labels ? (
+                                  Object.entries(r.labels).map(([k, v]) => (
+                                    <span
+                                      className={`badge ${badgeClass(v)}`}
+                                      key={k}
+                                    >
+                                      {k}: {v}
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="badge badge-muted">
+                                    unlabeled
+                                  </span>
+                                )}
                               </div>
                             </td>
                             <td className="td-ts">{fmtTime(r.created_at)}</td>
@@ -357,7 +424,6 @@ export default function Page() {
               </div>
             </>
           )}
-
         </div>
       </main>
     </div>
