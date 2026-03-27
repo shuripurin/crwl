@@ -19,6 +19,7 @@ Key features:
   - `setup_db.py` — create Postgres tables
   - `crawl.py` — research web results using Claude agents
   - `label.py` — label unlabeled results using Claude agents
+  - `export.py` — export results and labels to JSON
   - `start_dashboard.sh` — launch the dashboard
   - `requirements.txt` — Python dependencies
 - `dashboard/`
@@ -88,6 +89,16 @@ python scripts/label.py --schema "relevance:high/medium/low, type:article/study/
 
 This command classifies unlabeled results and stores structured labels in the `labels` table.
 
+### Export results
+
+```bash
+python scripts/export.py                                    # all results → export.json
+python scripts/export.py --labeled-only -o research.json    # only labeled
+python scripts/export.py --topic "coral reef restoration"   # filter by topic
+```
+
+Exports results and labels to a JSON file for downstream use.
+
 ## Architecture
 
 ### Python Scripts
@@ -121,3 +132,5 @@ This command classifies unlabeled results and stores structured labels in the `l
    - `bash scripts/start_dashboard.sh`
 4. Label results:
    - `python scripts/label.py --schema "relevance:high/medium/low, type:article/study/news" --agents 2`
+5. Export results:
+   - `python scripts/export.py --labeled-only -o research.json`

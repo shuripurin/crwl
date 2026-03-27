@@ -48,6 +48,9 @@ bash scripts/start_dashboard.sh
 # Label results
 python scripts/label.py --schema "relevance:high/medium/low, type:article/study/news" --agents 3
 
+# Export results to JSON
+python scripts/export.py --labeled-only -o research.json
+
 # Inspect DB directly
 ghost psql <db-id>
 ```

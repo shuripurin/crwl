@@ -41,6 +41,16 @@ bash scripts/start_dashboard.sh
 
 Opens a Next.js dashboard at `localhost:3000` that polls the database every 2s — shows stats, active agents, activity log, and results with label badges.
 
+### Export results
+
+```bash
+python scripts/export.py                          # export all to export.json
+python scripts/export.py --labeled-only -o out.json  # only labeled results
+python scripts/export.py --topic "coral reef restoration"
+```
+
+Dumps results with their labels to a JSON file that can be read by the calling agent.
+
 ### Inspect the database
 
 ```bash
@@ -53,3 +63,4 @@ ghost psql <db-id>
 2. `bash scripts/start_dashboard.sh` (in another terminal)
 3. `python scripts/label.py --schema "relevance:high/medium/low, type:article/study/news" --agents 3`
 4. Watch results and labels appear live in the dashboard
+5. `python scripts/export.py --labeled-only -o research.json` — export for downstream use
