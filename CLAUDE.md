@@ -76,6 +76,13 @@ Three tables:
 - **`labels`** — classification labels per result (result_id FK, labels JSONB)
 - **`agent_logs`** — agent activity log (agent_id, agent_type, status, message)
 
+## Commit Messages
+
+- Format: `type: short message` (e.g. `feat: add crawl agent`, `fix: handle empty results`, `chore: update deps`)
+- Types: `feat`, `fix`, `chore`
+- Keep it short, lowercase, no period
+- No `Co-Authored-By` trailers
+
 ## See Also
 
 - `PLAN.md` — full implementation plan with phases and verification steps

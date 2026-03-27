@@ -84,7 +84,7 @@ DATABASE_URL=postgresql://...  # from `ghost connect <db-id>`
 - Each agent gets a unique research angle (news, academic, practical, datasets, case studies, tutorials, opinion, historical)
 - Uses `AsyncAnthropic` with `web_search_20260209` tool (dynamic filtering for better result quality):
   ```python
-  tools=[{"type": "web_search_20260209", "name": "web_search"}]
+  tools=[{"type": "web_search_20260209", "name": "web_search", "max_uses": 10}]
   ```
 - **Connection management**: each agent creates its own `psycopg2` connection at startup (not shared) so transactions are isolated
 - **Conversation loop** for `pause_turn`:

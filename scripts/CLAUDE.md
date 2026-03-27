@@ -4,6 +4,7 @@
 - Use `AsyncAnthropic` client (not sync `Anthropic`)
 - `asyncio.gather` for parallel agents
 - `psycopg2-binary` with `asyncio.to_thread` for non-blocking DB calls
+- Wrap entire transactional sequences (e.g. `SELECT FOR UPDATE` → process → `INSERT`/`UPDATE`) in a single `asyncio.to_thread` call to preserve row locks
 
 ## Web Search Tool
 ```python
