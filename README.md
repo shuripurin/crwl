@@ -14,6 +14,8 @@ Key features:
 - Next.js dashboard for live monitoring
 - Raw SQL + lightweight `pg` and `psycopg2` usage
 
+**Tech stack:** Python, TypeScript, CSS | Next.js + React | PostgreSQL via raw SQL (`pg`, `psycopg2`) | Ghost CLI for DB provisioning | Anthropic Claude API with `web_search_20260209` tool
+
 ## Repository Structure
 
 - `scripts/`
