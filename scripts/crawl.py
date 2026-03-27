@@ -81,7 +81,7 @@ async def run_agent(
     agent_id: str, topic: str, angle: str, max_results: int, db_url: str
 ):
     conn = await asyncio.to_thread(psycopg2.connect, db_url)
-    client = anthropic.AsyncAnthropic()
+    client = anthropic.AsyncAnthropic(max_retries=4)
 
     system = (
         f"You are a research agent focused on: {angle}.\n"
@@ -109,39 +109,13 @@ async def run_agent(
 
     try:
         while turn < max_turns and results_found < max_results:
-            attempt = 0
-            response = None
-            while attempt < 3:
-                try:
-                    response = await client.messages.create(
-                        model="claude-sonnet-4-6",
-                        max_tokens=4096,
-                        system=system,
-                        tools=tools,
-                        messages=messages,
-                    )
-                    break
-                except anthropic.RateLimitError:
-                    wait = 2**attempt
-                    await asyncio.to_thread(
-                        db_log,
-                        conn,
-                        agent_id,
-                        "warning",
-                        f"Rate limited, retrying in {wait}s",
-                    )
-                    await asyncio.sleep(wait)
-                    attempt += 1
-
-            if response is None:
-                await asyncio.to_thread(
-                    db_log,
-                    conn,
-                    agent_id,
-                    "error",
-                    "Max retries exceeded on rate limit",
-                )
-                break
+            response = await client.messages.create(
+                model="claude-sonnet-4-6",
+                max_tokens=4096,
+                system=system,
+                tools=tools,
+                messages=messages,
+            )
 
             for block in response.content:
                 if block.type == "text":
@@ -174,7 +148,24 @@ async def run_agent(
             if response.stop_reason == "end_turn":
                 break
 
-            messages.append({"role": "assistant", "content": response.content})
+            # Filter out code_execution blocks that lack results, which cause
+            # 400 errors when echoed back in the conversation history.
+            filtered = [
+                b
+                for b in response.content
+                if getattr(b, "type", None) != "code_execution"
+            ]
+            if not filtered:
+                break
+            messages.append({"role": "assistant", "content": filtered})
+
+            # pause_turn means the server-side web search hit its iteration
+            # limit. Re-send without an extra user message — the API detects
+            # the trailing server_tool_use block and resumes automatically.
+            if response.stop_reason == "pause_turn":
+                turn += 1
+                continue
+
             messages.append({"role": "user", "content": "Continue searching."})
             turn += 1
 
